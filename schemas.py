@@ -12,3 +12,15 @@ class FilmRequest(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class PlanetRequest(BaseModel):
+    id: Optional[int] = None
+    name: str
+    climates: str
+    diameter: str
+    population: str
+    films: Optional[List[int]]
+
+    class Config:
+        orm_mode = True
