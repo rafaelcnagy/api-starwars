@@ -22,7 +22,7 @@ class Film(Base):
 class Planet(Base):
     __tablename__ = 'planet'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String, index=True, unique=True)
     climates = Column(String)
     diameter = Column(Float)
     population = Column(Integer)
