@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
-import models, star_wars_api
-from database import engine, SessionLocal
+import database.models as models, star_wars_api
+from database.database import engine, SessionLocal
 
 models.Base.metadata.create_all(bind=engine)
 

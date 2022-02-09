@@ -1,8 +1,8 @@
 import datetime
 import requests
 
-from database import SessionLocal
-import models
+from database.database import SessionLocal
+import database.models as models
 
 
 def download_official_data():

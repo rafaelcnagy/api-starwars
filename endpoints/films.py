@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import List
 
-import models, schemas
+import database.models as models, schemas.schemas as schemas
 from main import get_db
 
 router = APIRouter(

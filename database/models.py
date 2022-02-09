@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Date
-from database import Base
+from database.database import Base
 
 class Association(Base):
     __tablename__ = 'association'
