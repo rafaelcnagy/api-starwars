@@ -1,13 +1,18 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, APIRouter
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import List
 
 import models, schemas
-from main import app, get_db
+from main import get_db
 
+router = APIRouter(
+    prefix="/film",
+    tags=["Film"],
+    responses={404: {"description": "Not found"}},
+)
 
-@app.get("/films/", response_model=List[schemas.FilmRequest])
+@router.get("/", response_model=List[schemas.FilmRequest])
 def show_all_films(db: Session = Depends(get_db)):
     films_db = db.query(models.Film).all()
     films = list()
@@ -24,7 +29,7 @@ def show_all_films(db: Session = Depends(get_db)):
     
     return films
 
-@app.get("/film/{id}", response_model=schemas.FilmRequest)
+@router.get("/{id}", response_model=schemas.FilmRequest)
 def show_film(id: int, db: Session = Depends(get_db)):
     film_db = db.query(models.Film).get(id)
 
@@ -40,7 +45,7 @@ def show_film(id: int, db: Session = Depends(get_db)):
 
     return film
 
-@app.post("/film/create/", response_model=schemas.FilmRequest, status_code=status.HTTP_201_CREATED)
+@router.post("/create/", response_model=schemas.FilmRequest, status_code=status.HTTP_201_CREATED)
 def create_film(film: schemas.FilmRequest, db: Session = Depends(get_db)):
     
     film_db = models.Film(
@@ -76,7 +81,7 @@ def create_film(film: schemas.FilmRequest, db: Session = Depends(get_db)):
     
     return film
 
-@app.put("/film/{id}/update", response_model=schemas.FilmRequest)
+@router.put("/{id}/update", response_model=schemas.FilmRequest)
 def update_film(id: int, film: schemas.FilmRequest, db: Session = Depends(get_db)):
     
     film_db = db.query(models.Film).get(id)
@@ -124,7 +129,7 @@ def update_film(id: int, film: schemas.FilmRequest, db: Session = Depends(get_db
     
     return film
 
-@app.delete("/film/{id}/delete", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}/delete", status_code=status.HTTP_204_NO_CONTENT)
 def delete_film(id: int, db: Session = Depends(get_db)):
     
     film_db = db.query(models.Film).get(id)

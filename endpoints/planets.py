@@ -1,13 +1,18 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, APIRouter
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import List
 
 import models, schemas
-from main import app, get_db
+from main import get_db
 
+router = APIRouter(
+    prefix="/planet",
+    tags=["Planet"],
+    responses={404: {"description": "Not found"}},
+)
 
-@app.get("/planets/", response_model=List[schemas.PlanetRequest])
+@router.get("/", response_model=List[schemas.PlanetRequest])
 def show_all_planets(db: Session = Depends(get_db)):
     planets_db = db.query(models.Planet).all()
     planets = list()
@@ -26,7 +31,7 @@ def show_all_planets(db: Session = Depends(get_db)):
     
     return planets
 
-@app.get("/planet/{id}", response_model=schemas.PlanetRequest)
+@router.get("/{id}", response_model=schemas.PlanetRequest)
 def show_planet(id: int, db: Session = Depends(get_db)):
     planet_db = db.query(models.Planet).get(id)
 
@@ -44,7 +49,7 @@ def show_planet(id: int, db: Session = Depends(get_db)):
 
     return planet
 
-@app.post("/planet/create/", response_model=schemas.PlanetRequest, status_code=status.HTTP_201_CREATED)
+@router.post("/create/", response_model=schemas.PlanetRequest, status_code=status.HTTP_201_CREATED)
 def create_planet(planet: schemas.PlanetRequest, db: Session = Depends(get_db)):
     
     planet_db = models.Planet(
@@ -82,7 +87,7 @@ def create_planet(planet: schemas.PlanetRequest, db: Session = Depends(get_db)):
     
     return planet
 
-@app.put("/planet/{id}/update", response_model=schemas.PlanetRequest)
+@router.put("/{id}/update", response_model=schemas.PlanetRequest)
 def update_planet(id: int, planet: schemas.PlanetRequest, db: Session = Depends(get_db)):
     
     planet_db = db.query(models.Planet).get(id)
@@ -132,7 +137,7 @@ def update_planet(id: int, planet: schemas.PlanetRequest, db: Session = Depends(
     
     return planet
 
-@app.delete("/planet/{id}/delete", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}/delete", status_code=status.HTTP_204_NO_CONTENT)
 def delete_planet(id: int, db: Session = Depends(get_db)):
     
     planet_db = db.query(models.Planet).get(id)
