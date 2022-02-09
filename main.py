@@ -6,13 +6,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse
 
-import models, schemas
+import models, schemas, api
 from database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
+api.download_official_data()
 
 app.add_middleware(
     CORSMiddleware,
