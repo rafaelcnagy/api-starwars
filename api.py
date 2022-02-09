@@ -39,8 +39,8 @@ def request_films(db):
             official=True,
         )
 
-        film_db_exists = db.execute(select(models.Film).where(models.Film.title == title)).one()
-        if not film_db_exists:
+        film_db_exists = db.query(models.Film).filter_by(title=title).first()
+        if film_db_exists is None:
             db.add(film_db)
             db.commit()
             db.refresh(film_db)
@@ -72,8 +72,8 @@ def request_planets(db, films):
                 official=True,
             )
 
-            planet_db_exists = db.execute(select(models.Planet).where(models.Planet.name == name)).one()
-            if not planet_db_exists:
+            planet_db_exists = db.query(models.Planet).filter_by(name=name).first()
+            if planet_db_exists is None:
                 for film_url in planet_json['films']:
                     film_db = films[film_url]
                     association = models.Association(official=True)
