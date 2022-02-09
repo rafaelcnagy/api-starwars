@@ -1,7 +1,5 @@
 import datetime
-from sqlalchemy.exc import IntegrityError
 import requests
-from sqlalchemy import select
 
 from database import SessionLocal
 import models
