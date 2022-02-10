@@ -1,10 +1,12 @@
+import pytest
+import os
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from main import app, get_db
 from database.database import Base
-
 
 # CREATE DATABASE FOR TESTS
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -26,6 +28,12 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
+
+# Drop databasse after run all tests
+@pytest.fixture(scope='session', autouse=True)
+def drop_test_database():
+    yield 
+    os.remove('test.db')
 
 
 # --- TESTS ---
