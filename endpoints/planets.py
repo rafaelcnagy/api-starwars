@@ -96,9 +96,10 @@ def update_planet(id: int, planet: schemas.PlanetRequest, db: Session = Depends(
         raise HTTPException(status_code=404, detail=f'Planet with id {id} not found')
     
     planet_db.name = planet.name
-    planet_db.climates = planet.climates
-    planet_db.diameter = planet.diameter
-    planet_db.population = planet.population
+    
+    planet_db.climates = planet.climates if planet.climates else planet_db.climates
+    planet_db.diameter = planet.diameter if planet.diameter else planet_db.diameter
+    planet_db.population = planet.population if planet.population else planet_db.population
 
     # Verifica se filmas existem no banco
     films_db = list()
