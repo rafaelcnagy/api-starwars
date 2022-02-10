@@ -1,2 +1,28 @@
 # api-starwars
-A fastApi project made as a technical test for Mr. Turing
+A fastApi project made as a technical challenge for Mr. Turing.
+
+More details about the challenge in the [link](https://docs.google.com/document/d/1V6tVNejwDyvigKwlzfv0iJOzVjorGdrN6dAKsA7Pt-Q/edit).
+
+# Requirements
+- python 3.8
+- poetry
+
+# Install
+Run on terminal:
+
+    poetry install
+
+# Run
+By default, the server will run on **localhost**, using the port **8000**.
+
+Run on terminal:
+
+    poetry run uvicorn main:app
+
+# Tests
+Run on terminal:
+    
+    poetry run pytest
+
+# Docs
+Acessing [localhost:8000](http://localhost:8000) you will see the automatic interactive API documentation.
