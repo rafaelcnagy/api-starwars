@@ -81,40 +81,41 @@ def create_film(film: schemas.FilmRequest, db: Session = Depends(get_db)):
     
     return film
 
-@router.put("/{id}/update", response_model=schemas.FilmRequest)
-def update_film(id: int, film: schemas.FilmRequest, db: Session = Depends(get_db)):
+@router.put("/{id}/update", response_model=schemas.FilmUpdateRequest)
+def update_film(id: int, film: schemas.FilmUpdateRequest, db: Session = Depends(get_db)):
     
     film_db = db.query(models.Film).get(id)
 
     if not film_db:
         raise HTTPException(status_code=404, detail=f'Film with id {id} not found')
     
-    film_db.title = film.title
-    film_db.release_date = film.release_date
+    film_db.title = film.title if film.title else film_db.title
+    film_db.release_date = film.release_date if film.release_date else film_db.release_date
 
-    # Verifica se planetas existem no banco
-    planets_db = list()
-    for planet_id in film.planets:
-        planet_db = db.query(models.Planet).get(planet_id)
-        if not planet_db:
-            raise HTTPException(status_code=404, detail=f'Planet with id {planet_id} not found')
-        planets_db.append(planet_db)
+    if film.planets is not None:
+        # Verifica se planetas existem no banco
+        planets_db = list()
+        for planet_id in film.planets:
+            planet_db = db.query(models.Planet).get(planet_id)
+            if not planet_db:
+                raise HTTPException(status_code=404, detail=f'Planet with id {planet_id} not found')
+            planets_db.append(planet_db)
 
-    # Encontra associações planeta-filme que devem ser adicionados e removidos
-    planets_db_to_add = [planet_db for planet_db in planets_db if planet_db not in film_db.planets]
-    associations_to_remove = [planet_db for planet_db in film_db.planets if planet_db not in planets_db]
+        # Encontra associações planeta-filme que devem ser adicionados e removidos
+        planets_db_to_add = [planet_db for planet_db in planets_db if planet_db not in film_db.planets]
+        associations_to_remove = [planet_db for planet_db in film_db.planets if planet_db not in planets_db]
 
-    # Adiciona associações
-    for planet_db in planets_db_to_add:
-        association = models.Association()
-        association.planet = planet_db
-        film_db.planets.append(association)
-        db.add(association)
+        # Adiciona associações
+        for planet_db in planets_db_to_add:
+            association = models.Association()
+            association.planet = planet_db
+            film_db.planets.append(association)
+            db.add(association)
 
-    # Remove associações
-    for association in associations_to_remove:
-        association = db.query(models.Association).get({'planet_id': association.planet_id, 'film_id': film_db.id})
-        db.delete(association)
+        # Remove associações
+        for association in associations_to_remove:
+            association = db.query(models.Association).get({'planet_id': association.planet_id, 'film_id': film_db.id})
+            db.delete(association)
 
     try:
         db.commit()
