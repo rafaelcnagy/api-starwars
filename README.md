@@ -25,4 +25,4 @@ Run on terminal:
     poetry run pytest
 
 # Docs
-Acessing [localhost:8000](http://localhost:8000) you will see the automatic interactive API documentation.
+Accessing [localhost:8000](http://localhost:8000) you will see the automatic interactive API documentation.
