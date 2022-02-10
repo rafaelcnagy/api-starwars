@@ -1,10 +1,13 @@
+from msilib import schema
 from fastapi import Depends, HTTPException, status, APIRouter
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import List
 
-import database.models as models, schemas.schemas as schemas
+import database.models as models, schemas as schemas
 from main import get_db
+from schemas.films import FilmRequest, FilmUpdateRequest, FilmResponse
+
 
 router = APIRouter(
     prefix="/film",
@@ -12,14 +15,14 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/", response_model=List[schemas.FilmRequest])
+@router.get("/", response_model=List[FilmResponse])
 def show_all_films(db: Session = Depends(get_db)):
     films_db = db.query(models.Film).all()
-    films = list()
+    response = list()
 
     for film_db in films_db:
-        films.append(
-            schemas.FilmRequest(
+        response.append(
+            FilmResponse(
                 id=film_db.id, 
                 title=film_db.title, 
                 release_date=film_db.release_date,
@@ -27,26 +30,26 @@ def show_all_films(db: Session = Depends(get_db)):
             )
         )
     
-    return films
+    return response
 
-@router.get("/{id}", response_model=schemas.FilmRequest)
+@router.get("/{id}", response_model=FilmResponse)
 def show_film(id: int, db: Session = Depends(get_db)):
     film_db = db.query(models.Film).get(id)
 
     if not film_db:
         raise HTTPException(status_code=404, detail=f'Film with id {id} not found')
 
-    film = schemas.FilmRequest(
+    response = FilmResponse(
         id=film_db.id, 
         title=film_db.title, 
         release_date=film_db.release_date,
         planets=[association.planet_id for association in film_db.planets],
     )
 
-    return film
+    return response
 
-@router.post("/create/", response_model=schemas.FilmRequest, status_code=status.HTTP_201_CREATED)
-def create_film(film: schemas.FilmRequest, db: Session = Depends(get_db)):
+@router.post("/create/", response_model=FilmResponse, status_code=status.HTTP_201_CREATED)
+def create_film(film: FilmRequest, db: Session = Depends(get_db)):
     
     film_db = models.Film(
         title=film.title,
@@ -77,12 +80,17 @@ def create_film(film: schemas.FilmRequest, db: Session = Depends(get_db)):
 
     db.refresh(film_db)
 
-    film.id = film_db.id
+    response = FilmResponse(
+        id=film_db.id,
+        title=film_db.title,
+        release_date=film_db.release_date,
+        planets=[association.planet_id for association in film_db.planets],
+    )
     
-    return film
+    return response
 
-@router.put("/{id}/update", response_model=schemas.FilmUpdateRequest)
-def update_film(id: int, film: schemas.FilmUpdateRequest, db: Session = Depends(get_db)):
+@router.put("/{id}/update", response_model=FilmResponse)
+def update_film(id: int, film: FilmUpdateRequest, db: Session = Depends(get_db)):
     
     film_db = db.query(models.Film).get(id)
 
@@ -90,7 +98,7 @@ def update_film(id: int, film: schemas.FilmUpdateRequest, db: Session = Depends(
         raise HTTPException(status_code=404, detail=f'Film with id {id} not found')
     
     film_db.title = film.title if film.title else film_db.title
-    film_db.release_date = film.release_date if film.release_date else film_db.release_date
+    film_db.release_date = film.release_date if film.release_date is not None else film_db.release_date
 
     if film.planets is not None:
         # Verifica se planetas existem no banco
@@ -126,9 +134,13 @@ def update_film(id: int, film: schemas.FilmUpdateRequest, db: Session = Depends(
     
     db.refresh(film_db)
 
-    film.id = film_db.id
-    
-    return film
+    response = FilmResponse(
+        id=film_db.id,
+        title=film_db.title,
+        release_date=film_db.release_date,
+        planets=[association.planet_id for association in film_db.planets],
+    )
+    return response
 
 @router.delete("/{id}/delete", status_code=status.HTTP_204_NO_CONTENT)
 def delete_film(id: int, db: Session = Depends(get_db)):
@@ -145,4 +157,3 @@ def delete_film(id: int, db: Session = Depends(get_db)):
     db.commit()
     
     return
-

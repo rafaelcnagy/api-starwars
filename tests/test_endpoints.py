@@ -62,8 +62,8 @@ def test_planet_create():
         'id': 1,
         'name': 'Planeteste',
         'climates': 'arrid',
-        'diameter': '1000',
-        'population': '1000',
+        'diameter': 1000,
+        'population': 1000,
         'films': [1]
     }
 
@@ -89,13 +89,12 @@ def test_planet_read():
     
     response = client.get('/planet/1')
     assert response.status_code == 200
-    print(response.json())
     assert response.json() == {
         'id': 1,
         'name': 'Planeteste',
         'climates': 'arrid',
-        'diameter': '1000.0',
-        'population': '1000',
+        'diameter': 1000.0,
+        'population': 1000,
         'films': [1]
     }
 
@@ -125,8 +124,8 @@ def test_planet_update():
     data = {
         'name': 'Planeteste',
         'climates': 'arrid, urban',
-        'diameter': '1000.0',
-        'population': '10000000',
+        'diameter': 1000.0,
+        'population': 10000000,
         'films': [1]
     }
     
@@ -136,8 +135,8 @@ def test_planet_update():
         'id': 1,
         'name': 'Planeteste',
         'climates': 'arrid, urban',
-        'diameter': '1000.0',
-        'population': '10000000',
+        'diameter': 1000.0,
+        'population': 10000000,
         'films': [1]
     }
 

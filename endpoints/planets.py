@@ -3,7 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import List
 
-import database.models as models, schemas.schemas as schemas
+import database.models as models
+from schemas.planets import PlanetRequest, PlanetUpdateRequest, PlanetResponse
 from main import get_db
 
 router = APIRouter(
@@ -12,14 +13,14 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/", response_model=List[schemas.PlanetRequest])
+@router.get("/", response_model=List[PlanetResponse])
 def show_all_planets(db: Session = Depends(get_db)):
     planets_db = db.query(models.Planet).all()
-    planets = list()
+    response = list()
 
     for planet_db in planets_db:
-        planets.append(
-            schemas.PlanetRequest(
+        response.append(
+            PlanetResponse(
                 id=planet_db.id, 
                 name=planet_db.name, 
                 climates=planet_db.climates,
@@ -29,16 +30,16 @@ def show_all_planets(db: Session = Depends(get_db)):
             )
         )
     
-    return planets
+    return response
 
-@router.get("/{id}", response_model=schemas.PlanetRequest)
+@router.get("/{id}", response_model=PlanetResponse)
 def show_planet(id: int, db: Session = Depends(get_db)):
     planet_db = db.query(models.Planet).get(id)
 
     if not planet_db:
         raise HTTPException(status_code=404, detail=f'Planet with id {id} not found')
 
-    planet = schemas.PlanetRequest(
+    planet = PlanetResponse(
         id=planet_db.id, 
         name=planet_db.name, 
         climates=planet_db.climates,
@@ -49,8 +50,8 @@ def show_planet(id: int, db: Session = Depends(get_db)):
 
     return planet
 
-@router.post("/create/", response_model=schemas.PlanetRequest, status_code=status.HTTP_201_CREATED)
-def create_planet(planet: schemas.PlanetRequest, db: Session = Depends(get_db)):
+@router.post("/create/", response_model=PlanetResponse, status_code=status.HTTP_201_CREATED)
+def create_planet(planet: PlanetRequest, db: Session = Depends(get_db)):
     
     planet_db = models.Planet(
         name=planet.name, 
@@ -83,25 +84,32 @@ def create_planet(planet: schemas.PlanetRequest, db: Session = Depends(get_db)):
 
     db.refresh(planet_db)
 
-    planet.id = planet_db.id
+    response = PlanetResponse(
+        id=planet_db.id, 
+        name=planet_db.name, 
+        climates=planet_db.climates,
+        diameter=planet_db.diameter,
+        population=planet_db.population,
+        films=[association.film_id for association in planet_db.films],
+    )
     
-    return planet
+    return response
 
-@router.put("/{id}/update", response_model=schemas.PlanetUpdateRequest)
-def update_planet(id: int, planet: schemas.PlanetUpdateRequest, db: Session = Depends(get_db)):
+@router.put("/{id}/update", response_model=PlanetResponse)
+def update_planet(id: int, planet: PlanetUpdateRequest, db: Session = Depends(get_db)):
     
     planet_db = db.query(models.Planet).get(id)
 
     if not planet_db:
         raise HTTPException(status_code=404, detail=f'Planet with id {id} not found')
     
-    planet_db.name = planet.name
+    planet_db.name = planet.name if planet.name is not None else planet_db.name
     
-    planet_db.climates = planet.climates if planet.climates else planet_db.climates
-    planet_db.diameter = planet.diameter if planet.diameter else planet_db.diameter
-    planet_db.population = planet.population if planet.population else planet_db.population
+    planet_db.climates = planet.climates if planet.climates is not None else planet_db.climates
+    planet_db.diameter = planet.diameter if planet.diameter is not None else planet_db.diameter
+    planet_db.population = planet.population if planet.population is not None else planet_db.population
 
-    if planet.films:
+    if planet.films is not None:
         # Verifica se filmas existem no banco
         films_db = list()
         for film_id in planet.films:
@@ -134,10 +142,16 @@ def update_planet(id: int, planet: schemas.PlanetUpdateRequest, db: Session = De
         raise e
     
     db.refresh(planet_db)
-
-    planet.id = planet_db.id
     
-    return planet
+    response = PlanetResponse(
+        id=planet_db.id, 
+        name=planet_db.name, 
+        climates=planet_db.climates,
+        diameter=planet_db.diameter,
+        population=planet_db.population,
+        films=[association.film_id for association in planet_db.films],
+    )
+    return response
 
 @router.delete("/{id}/delete", status_code=status.HTTP_204_NO_CONTENT)
 def delete_planet(id: int, db: Session = Depends(get_db)):
@@ -154,4 +168,3 @@ def delete_planet(id: int, db: Session = Depends(get_db)):
     db.commit()
     
     return
-
