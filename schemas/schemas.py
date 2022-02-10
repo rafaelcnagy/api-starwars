@@ -8,7 +8,7 @@ class FilmRequest(BaseModel):
     id: Optional[int] = None
     title: str
     release_date: date
-    planets: Optional[List[int]]
+    planets: Optional[List[int]] = []
 
     class Config:
         orm_mode = True
@@ -17,10 +17,10 @@ class FilmRequest(BaseModel):
 class PlanetRequest(BaseModel):
     id: Optional[int] = None
     name: str
-    climates: str
-    diameter: str
-    population: str
-    films: Optional[List[int]]
+    climates: Optional[str] = None
+    diameter: Optional[str] = None
+    population: Optional[str] = None
+    films: Optional[List[int]] = []
 
     class Config:
         orm_mode = True
