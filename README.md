@@ -1,7 +1,7 @@
 # api-starwars
-A fastApi project made as a technical challenge for Mr. Turing.
+A project made as a way to study fastAPI.
 
-More details about the challenge in the [link](https://docs.google.com/document/d/1V6tVNejwDyvigKwlzfv0iJOzVjorGdrN6dAKsA7Pt-Q/edit).
+More details about the project requirements in the [link](https://docs.google.com/document/d/1V6tVNejwDyvigKwlzfv0iJOzVjorGdrN6dAKsA7Pt-Q/edit).
 
 # Requirements
 - python 3.8
